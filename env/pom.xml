@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cloud.openexperience</groupId>
+        <artifactId>cloud.openexperience.example</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>cloud.openexperience.example.env</artifactId>
+    <name>Open Experience Content - Example Environments</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <helm-mode>upgrade</helm-mode>
+        <helm-template>https://openexperiencecloud.jfrog.io/artifactory/helm/cloud-openexperience-charts-standalone-1.0.0-SNAPSHOT.tgz</helm-template>
+    </properties>
+
+
+    <modules>
+        <module>dev</module>
+        <module>stage</module>
+        <module>prod</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>helm-install</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>helm</executable>
+                                <workingDirectory>${project.basedir}/src/main/helm</workingDirectory>
+                                <arguments>
+                                    <argument>${helm-mode}</argument>
+                                    <argument>${app.name}</argument>
+                                    <argument>${helm-template}</argument>
+                                    <argument>-f</argument>
+                                    <argument>values.yaml</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

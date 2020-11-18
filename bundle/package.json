@@ -1,0 +1,12 @@
+{
+    "name": "openexperience-cloud-front-end",
+    "version": "1.0.0",
+    "description": "Scripts and Styles for openexperience-cloud",
+    "dependencies": {
+        "bootstrap": "^4.3.1"
+    },
+    "devDependencies": {
+        "gulp": "^4.0.1"
+    },
+    "license": "Apache-2.0"
+}

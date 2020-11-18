@@ -1,0 +1,140 @@
+# Default values for oec.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  cms:
+    repository: openexperiencecloud.jfrog.io/docker/cloud.openexperience.example.image
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: 1.0.0-SNAPSHOT
+  web:
+    repository: openexperiencecloud.jfrog.io/docker/cloud.openexperience.content.images.webcache
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: 1.0.0-SNAPSHOT
+
+
+resources: 
+  cms:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  web: {}
+
+imagePullSecrets: {}
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: stage.openexperience.local
+      paths: [/]
+    - host: cms-stage.openexperience.local
+      paths: [/]
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+httpdConf:
+  00-web.conf: |
+    <VirtualHost *:80>
+      ServerName cms.openexperience.local
+
+      DocumentRoot /var/www/html
+
+      RewriteEngine On
+      RewriteRule /.well-known - [R=200]
+
+      ProxyPass /.well-known !
+      ProxyPass / http://localhost:8080/
+      ProxyPassReverse / http://localhost:8080/
+
+      AllowEncodedSlashes on
+    </VirtualHost>
+  01-site.conf: |
+    <VirtualHost *:80>
+      ServerName www.openexperience.local
+
+      DocumentRoot /var/www/html
+
+      RewriteEngine On
+      RewriteRule /.well-known - [R=200]
+
+      # Configure mod_expire
+      ExpiresActive On
+      ExpiresDefault "access plus 1 month"
+      ExpiresByType text/html "access plus 5 minutes"
+      ExpiresByType application/json "access plus 5 minutes"
+      ExpiresByType image/gif "access plus 1 year"
+      ExpiresByType image/jpeg "access plus 1 year"
+      ExpiresByType image/png "access plus 1 year"
+      ExpiresByType text/css "access plus 1 month"
+      ExpiresByType text/javascript "access plus 1 month"
+      ExpiresByType application/javascript "access plus 1 month"
+
+      # Configure mod_cache
+      CacheEnable disk /
+      CacheIgnoreNoLastMod On
+      CacheDefaultExpire 600
+
+      # Configure Proxy
+      ProxyPass /.well-known !
+      ProxyPass /static/clientlibs/openexperience-cloud/ http://localhost:8080/static/clientlibs/openexperience-cloud/ connectiontimeout=10 timeout=60 retry=0
+      ProxyPassReverse /static/clientlibs/openexperience-cloud/ http://localhost:8080/static/clientlibs/openexperience-cloud/
+      ProxyPass / http://localhost:8080/content/openexperience-cloud/ connectiontimeout=10 timeout=60 retry=0
+      ProxyPassReverse /content/openexperience-cloud/ http://localhost:8080/content/openexperience-cloud/
+
+      AllowEncodedSlashes on
+    </VirtualHost>
+
+cmsSecrets:
+  passwd: |
+    password123
