@@ -86,7 +86,7 @@ affinity: {}
 httpdConf:
   00-web.conf: |
     <VirtualHost *:80>
-      ServerName cms.openexperience.local
+      ServerName cms-stage.openexperience.local
 
       DocumentRoot /var/www/html
 
@@ -101,7 +101,7 @@ httpdConf:
     </VirtualHost>
   01-site.conf: |
     <VirtualHost *:80>
-      ServerName www.openexperience.local
+      ServerName stage.openexperience.local
 
       DocumentRoot /var/www/html
 
